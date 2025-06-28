@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Tripulante\Desktop\Repos\GameOfLife\libs\SFML-2.5.1\build\CMakeFiles\21d42cbc7ca06dcb21bcd066ae3267fc\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{93F107BC-31E5-3CF0-8ED8-C16DE885DD06}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

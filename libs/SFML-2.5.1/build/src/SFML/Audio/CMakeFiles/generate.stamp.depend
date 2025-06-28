@@ -1,0 +1,7 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindOpenAL.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/FindPackageMessage.cmake
+C:/Users/Tripulante/Desktop/Repos/GameOfLife/libs/SFML-2.5.1/cmake/Modules/FindFLAC.cmake
+C:/Users/Tripulante/Desktop/Repos/GameOfLife/libs/SFML-2.5.1/cmake/Modules/FindVorbis.cmake
+C:/Users/Tripulante/Desktop/Repos/GameOfLife/libs/SFML-2.5.1/src/SFML/Audio/CMakeLists.txt
