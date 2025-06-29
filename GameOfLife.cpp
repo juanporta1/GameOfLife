@@ -3,6 +3,7 @@
 #include <chrono>
 #include <random>
 #include <unordered_set>
+#include <unordered_map>
 #include <utility>
 #include "GameOfLife.h"
 #include <string>
@@ -56,8 +57,8 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 100;
-    int rows = 100;
+    int cols = 1000;
+    int rows = 1000;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -84,7 +85,7 @@ int main()
     auto lastFrame = chrono::high_resolution_clock::now();
 
     std::unordered_set<std::pair<int, int>, hasher> aliveCells;
-    std::unordered_set<std::pair<int, int>, hasher> deadCells;
+    std::unordered_map<std::pair<int, int>,int, hasher> neighborCells;
 
     std::unordered_set<std::pair<int, int>, hasher> temporaryAliveCells;
 
@@ -156,39 +157,32 @@ int main()
             thisTurn = 0.0f;
 
 			temporaryAliveCells.clear();
-            deadCells.clear();
+            neighborCells.clear();
             for (const pair<int, int>& cell : aliveCells) {
-                int cellsAround = 0;
                 for (int dx = -1; dx <= 1; dx++) {
                     for (int dy = -1; dy <= 1; dy++) {
 						if (dx == 0 && dy == 0) continue; // Skip the cell itself
-                        if(aliveCells.contains({cell.first + dx, cell.second + dy})){
-                            cellsAround++;
-                        }
-                        else {
-							deadCells.insert({ cell.first + dx, cell.second + dy });
-                        }
+                       
+						neighborCells[{ cell.first + dx, cell.second + dy }]++;
+                    
 
                     }
                 }
-                if(cellsAround == 2 || cellsAround == 3) {
-                    temporaryAliveCells.insert(cell); // Cell stays alive
-				}
             }
 
-            for (const pair<int, int>& cell : deadCells) {
-                int cellsAround = 0;
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dy = -1; dy <= 1; dy++) {
-                        if (dx == 0 && dy == 0) continue; 
-                        if (aliveCells.contains({cell.first + dx, cell.second + dy})) {
-                            cellsAround++;
-						}
+            for (auto& [cell, neigbhors] : neighborCells) {
+                if (aliveCells.contains(cell)) 
+                {
+                    if (neigbhors == 2 || neigbhors == 3) {
+                        temporaryAliveCells.insert(cell);
                     }
                 }
-                if (cellsAround == 3) {
-                    temporaryAliveCells.insert(cell); // Cell becomes alive
-				}
+                else
+                {
+                    if (neigbhors == 3) {
+                        temporaryAliveCells.insert(cell);
+                    }
+                }
             }
 
             aliveCells = temporaryAliveCells;
