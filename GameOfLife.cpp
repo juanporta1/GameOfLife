@@ -6,180 +6,21 @@
 #include <cstdint>
 #include "GameOfLife.h"
 #include <string>
-
+#include <Grid.h>
 using namespace std;
-//Glider simple
-std::vector<std::vector<uint64_t>> lwss() {
-	int rows = 30, cols = 30;
-    std::vector<std::vector<uint64_t>> grid(rows, std::vector<uint64_t>(cols, 0));
-    int r = 5, c = 5;
-    grid[r][c + 1] = 1;
-    grid[r][c + 2] = 1;
-    grid[r + 1][c] = 1;
-    grid[r + 2][c] = 1;
-    grid[r + 3][c] = 1;
-    grid[r + 3][c + 1] = 1;
-    grid[r + 3][c + 2] = 1;
-    grid[r + 3][c + 3] = 1;
-    grid[r + 2][c + 4] = 1;
-    return grid;
-}
-//Dispara Gliders
-std::vector<std::vector<uint64_t>> gliderGun(int rows, int cols) {
-    std::vector<std::vector<uint64_t>> g(rows, std::vector<uint64_t>(cols, 0));
-    int r = 10, c = 10;
 
-    std::vector<std::pair<int, int>> coords = {
-        {0,24},
-        {1,22},{1,24},
-        {2,12},{2,13},{2,20},{2,21},{2,34},{2,35},
-        {3,11},{3,15},{3,20},{3,21},{3,34},{3,35},
-        {4,0},{4,1},{4,10},{4,16},{4,20},{4,21},
-        {5,0},{5,1},{5,10},{5,14},{5,16},{5,17},{5,22},{5,24},
-        {6,10},{6,16},{6,24},
-        {7,11},{7,15},
-        {8,12},{8,13}
-    };
-
-    for (auto [dr, dc] : coords) {
-        if (r + dr < rows && c + dc < cols)
-            g[r + dr][c + dc] = 1;
-    }
-
-    return g;
-}
 //Grilla Random
-std::vector<std::vector<uint64_t>> randomGrid(int rows, int cols, double density = 0.1) {
-    std::vector<std::vector<uint64_t>> grid(rows, std::vector<uint64_t>(cols, 0));
+std::vector<uint64_t> randomGrid(int rows, int cols, double density = 0.1) {
+    std::vector<uint64_t> grid(rows * cols,0);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::bernoulli_distribution d(density);
 
     for (int r = 0; r < rows; ++r)
         for (int c = 0; c < cols; ++c)
-            grid[r][c] = d(gen);
+            grid[r * cols + c] = d(gen);
     return grid;
 }
-//Generador de Gliders Mientras Avanza
-std::vector<std::vector<uint64_t>> backrake2(int rows, int cols) {
-    std::vector<std::vector<uint64_t>> g(rows, std::vector<uint64_t>(cols, 0));
-    int r = 10, c = 10;
-    std::vector<std::pair<int, int>> pattern = {
-        {0,0},{0,1},{1,0},{1,1},
-        {0,9},{0,10},{1,8},{1,9},{2,10},
-        {3,11},{4,12},{5,13},{6,14}
-    };
-    for (auto [dr, dc] : pattern)
-        g[r + dr][c + dc] = 1;
-    return g;
-}
-std::vector<std::vector<uint64_t>> quadPulsar() {
-    int rows = 40, cols = 40;
-    std::vector<std::vector<uint64_t>> g(rows, std::vector<uint64_t>(cols, 0));
-    auto placePulsar = [&](int r, int c) {
-        int d[] = { 0,1,2,4,5,6 };
-        for (int i : d) {
-            g[r + i][c + 2] = 1;
-            g[r + i][c + 7] = 1;
-            g[r + 2][c + i] = 1;
-            g[r + 7][c + i] = 1;
-        }
-        };
-    placePulsar(1, 1);
-    placePulsar(1, 20);
-    placePulsar(20, 1);
-    placePulsar(20, 20);
-    return g;
-}
-std::vector<std::vector<uint64_t>> epicShowcaseGrid() {
-    int rows = 100, cols = 200;
-    std::vector<std::vector<uint64_t>> g(rows, std::vector<uint64_t>(cols, 0));
-
-    auto place = [&](int r, int c, const std::vector<std::pair<int, int>>& pattern) {
-        for (auto [dr, dc] : pattern)
-            if (r + dr < rows && c + dc < cols)
-                g[r + dr][c + dc] = 1;
-        };
-
-    // Acorn
-    place(5, 5, {
-        {0,1}, {1,3},
-        {2,0},{2,1},{2,4},{2,5},{2,6}
-        });
-
-    // Diehard
-    place(5, 40, {
-        {0,6},
-        {1,0},{1,1},
-        {2,1},{2,5},{2,6},{2,7}
-        });
-
-    // R-pentomino
-    place(5, 80, {
-        {0,1},{0,2},{1,0},{1,1},{2,1}
-        });
-
-    // Simkin glider gun
-    place(30, 5, {
-        {0,1},{1,0},{1,1},{1,2},{2,2},
-        {4,2},{5,3},{6,1},{6,3},{7,2},
-        {9,2},{10,2},{11,2},
-        {13,1},{13,3},{14,1},{14,3},
-        {15,0},{15,1},{15,3},{15,4}
-        });
-
-    // Pentadecathlon
-    place(30, 60, [&]() {
-        std::vector<std::pair<int, int>> p;
-        for (int i = 0; i < 10; ++i) p.push_back({ 0, i });
-        p.push_back({ -1,1 }); p.push_back({ 1,1 });
-        p.push_back({ -1,8 }); p.push_back({ 1,8 });
-        return p;
-        }());
-
-    // Breeder
-    place(70, 5, {
-        {0,0},{0,1},{1,0},{1,1},
-        {10,0},{10,1},{11,0},{11,1},
-        {12,2},{13,3},{14,4},{15,5},{16,6},{17,7},{18,8}
-        });
-
-    // Glider collision (logic AND visual)
-    auto glider = [](int r, int c, bool flip = false) {
-        std::vector<std::pair<int, int>> g;
-        if (!flip) {
-            g = { {0,1}, {1,2}, {2,0}, {2,1}, {2,2} };
-        }
-        else {
-            g = { {0,0}, {1,-1}, {2,-2}, {2,-1}, {2,0} };
-        }
-        for (auto& [dr, dc] : g) {
-            dr += r; dc += c;
-        }
-        return g;
-        };
-    for (auto [r, c] : glider(60, 120, false)) g[r][c] = 1;
-    for (auto [r, c] : glider(60, 140, true)) g[r][c] = 1;
-
-    return g;
-}
-
-
-
-std::vector<std::vector<uint64_t>> koksGalaxy() {
-    int rows = 10, cols = 10;
-    std::vector<std::vector<uint64_t>> g(rows, std::vector<uint64_t>(cols, 0));
-    int r = 3, c = 3;
-    std::vector<std::pair<int, int>> pattern = {
-        {0,1},{0,2},{1,0},{1,3},{2,0},{2,3},{3,1},{3,2}
-    };
-    for (int dx = -1; dx <= 1; dx += 2)
-        for (int dy = -1; dy <= 1; dy += 2)
-            for (auto [dr, dc] : pattern)
-                g[r + dr * dy][c + dc * dx] = 1;
-    return g;
-}
-
 
 int main()
 {
@@ -187,8 +28,8 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 100;
-    int rows = 100;
+    int cols = 1000;
+    int rows = 1000;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -196,11 +37,12 @@ int main()
     view.setCenter(view.getSize() / 2.f);
     uint64_t initialValue = 0;
     
-    vector<vector<uint64_t>> grid(cols, vector<uint64_t>(rows, initialValue));
-    vector<vector<uint64_t>> temporaryGrid(cols, vector<uint64_t>(rows, initialValue));
 
-    grid = randomGrid(1000,1000,.1f);
-    vector<vector<uint64_t>> initialGrid = grid;
+    vector<uint64_t> g = randomGrid(rows, cols, .3f);
+	Grid mainGrid(rows, cols, g);
+    Grid temporaryGrid(rows,cols, g);
+    vector<uint64_t> initialGrid = mainGrid.grid;
+
     sf::Font font;
     if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) return -1;
 
@@ -264,92 +106,100 @@ int main()
             view.zoom(1.f + dt );  // Aleja (zoom out)
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-            grid = initialGrid;
+            mainGrid.grid = initialGrid;
         }
         
         thisTurn += dt;
         if (thisTurn > 0.1f && isPlaying) {
             thisTurn = 0.0f;
 
-            for (size_t x = 0; x < grid.size(); x++) {
-                if (grid[x][0]) {
-                    for (vector<uint64_t>& v : grid) {
-                        v.insert(v.begin(), 0);
-                    }
 
+           for(int x = 0; x < mainGrid.rows; x++) {
+                if (mainGrid.grid[x * mainGrid.cols]) {
+                    for (int i = 0; i < mainGrid.rows; i++) {
+                        
+                        mainGrid.grid.insert(mainGrid.grid.begin() + mainGrid.cols * i + i, 0);
+                    }
+                    mainGrid.cols++;
                     view.move(sf::Vector2f(0.f, cellSize));
 
                     break;
                 }
-            }
-            for (size_t y = 0; y < grid[0].size(); y++) {
-                if (grid[0][y]) {
-                    grid.insert(grid.begin(), vector<uint64_t>(grid[0].size(), 0));
+			}
+
+            for (int y = 0; y < mainGrid.cols; y++) {
+                if (mainGrid.grid[y]) {
+                    mainGrid.grid.insert(mainGrid.grid.begin(),mainGrid.cols, 0);
+                    mainGrid.rows++;
                     view.move(sf::Vector2f(cellSize, 0.f));
+
                     break;
 
                 }
             }
 
-            for (size_t x = 0; x < grid.size(); x++) {
-                if (grid[x][grid[0].size()-1]) {
-                    for (vector<uint64_t>& v : grid) {
-                        v.insert(v.end(), 0);
+            for (int x = 0; x < mainGrid.rows; x++) {
+                if (mainGrid.grid[x * mainGrid.cols + mainGrid.cols - 1]) {
+                    for (int i = 0; i < mainGrid.rows; i++) {
+                        mainGrid.grid.insert(mainGrid.grid.begin() + (i + 1) * mainGrid.cols + i - 1, 0);
                     }
+                    mainGrid.cols++;
                     break;
                 }
             }
-            for (size_t y = 0; y < grid[0].size(); y++) {
-                if (grid[grid.size()-1][y]) {
-                    grid.insert(grid.end(), vector<uint64_t>(grid[0].size(), 0));
-                    break;
 
+            for (int y = 0; y < mainGrid.cols; y++) {
+                if (mainGrid.grid[(mainGrid.rows - 1) * mainGrid.cols + y]) {
+                    mainGrid.grid.insert(mainGrid.grid.end(), mainGrid.cols, 0);
+                    mainGrid.rows++;
+                    break;
                 }
             }
-            temporaryGrid = grid;
-            for (size_t x = 0; x < grid.size(); x++) {
-                for (size_t y = 0; y < grid[0].size(); y++) {
+           
+            temporaryGrid = mainGrid;
+            for (size_t x = 0; x < mainGrid.rows; x++) {
+                for (size_t y = 0; y < mainGrid.cols; y++) {
 
                     int aliveCellsAround = 0;
                     for (int dx = -1; dx <= 1; dx++) {
                         for (int dy = -1; dy <= 1; dy++) {
                             if (dx == 0 && dy == 0) continue;
-                            if (x + dx < 0 || x + dx >= grid.size()) continue;
-                            if (y + dy < 0 || y + dy >= grid[0].size()) continue;
-                            aliveCellsAround += static_cast<int>(grid[x + dx][y + dy]);
+                            if (x + dx < 0 || x + dx >= mainGrid.rows) continue;
+                            if (y + dy < 0 || y + dy >= mainGrid.cols) continue;
+                            aliveCellsAround += static_cast<int>(mainGrid.grid[(x + dx) * mainGrid.cols + (y+dy)]);
                         }
                     }
 
-                    if (grid[x][y]) {
+                    if (mainGrid.grid[x * mainGrid.cols + y]) {
                         if (aliveCellsAround >= 2 && aliveCellsAround <= 3) {
-                            temporaryGrid[x][y] = 1;
+                            temporaryGrid.grid[x * temporaryGrid.cols + y] = 1;
                         }
                         else {
-                            temporaryGrid[x][y] = 0;
+                            temporaryGrid.grid[x * temporaryGrid.cols + y] = 0;
                         }
                     }
                     else {
                         if (aliveCellsAround == 3) {
-                            temporaryGrid[x][y] = 1;
+                            temporaryGrid.grid[x * temporaryGrid.cols + y] = 1;
                         }
                         else {
-                            temporaryGrid[x][y] = 0;
+                            temporaryGrid.grid[x * temporaryGrid.cols + y] = 0;
                         }
                     }
 
                 }
             }
 
-            grid = temporaryGrid;
+            mainGrid = temporaryGrid;
         }
 
         window.clear();
         window.setView(view);
 
         // DIBUJO DE LAS CELDAS
-        for (size_t x = 0; x < grid.size(); x++) {
-            for (size_t y = 0; y < grid[0].size(); y++) {
-                if (!grid[x][y]) continue;
+        for (size_t x = 0; x < mainGrid.rows; x++) {
+            for (size_t y = 0; y < mainGrid.cols; y++) {
+                if (!mainGrid.grid[x * mainGrid.cols + y]) continue;
                 sf::RectangleShape cell(sf::Vector2f(cellSize, cellSize));
                 cell.setPosition(sf::Vector2f(x * cellSize, y * cellSize));
                 cell.setFillColor(sf::Color::White);
@@ -363,7 +213,7 @@ int main()
 
         window.display();
 
-        cout << "En X: " << grid.size() << " En Y: " << grid[0].size() << endl;
+        cout << "En X: " << mainGrid.rows << " En Y: " << mainGrid.cols << endl;
         
 	}
 	return 0;

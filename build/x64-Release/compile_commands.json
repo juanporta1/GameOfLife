@@ -1,8 +1,20 @@
 [
 {
   "directory": "C:/Users/Tripulante/Desktop/Repos/GameOfLife/build/x64-Release",
-  "command": "C:\\PROGRA~1\\MICROS~2\\2022\\COMMUN~1\\VC\\Tools\\MSVC\\1444~1.352\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -external:IC:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\libs\\SFML-2.5.1\\install\\include -external:W0 /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob1 /DNDEBUG -std:c++20 -ZI /FoCMakeFiles\\GameOfLife.dir\\GameOfLife.cpp.obj /FdCMakeFiles\\GameOfLife.dir\\ /FS -c C:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\GameOfLife.cpp",
+  "command": "C:\\PROGRA~1\\MICROS~2\\2022\\COMMUN~1\\VC\\Tools\\MSVC\\1444~1.352\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\Grid -external:IC:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\libs\\SFML-2.5.1\\install\\include -external:W0 /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob1 /DNDEBUG -std:c++20 -ZI /FoCMakeFiles\\GameOfLife.dir\\GameOfLife.cpp.obj /FdCMakeFiles\\GameOfLife.dir\\ /FS -c C:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\GameOfLife.cpp",
   "file": "C:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\GameOfLife.cpp",
   "output": "CMakeFiles\\GameOfLife.dir\\GameOfLife.cpp.obj"
+},
+{
+  "directory": "C:/Users/Tripulante/Desktop/Repos/GameOfLife/build/x64-Release",
+  "command": "C:\\PROGRA~1\\MICROS~2\\2022\\COMMUN~1\\VC\\Tools\\MSVC\\1444~1.352\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\Grid -external:IC:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\libs\\SFML-2.5.1\\install\\include -external:W0 /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob1 /DNDEBUG -std:c++20 -ZI /FoCMakeFiles\\GameOfLife.dir\\Grid\\Grid.cpp.obj /FdCMakeFiles\\GameOfLife.dir\\ /FS -c C:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\Grid\\Grid.cpp",
+  "file": "C:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\Grid\\Grid.cpp",
+  "output": "CMakeFiles\\GameOfLife.dir\\Grid\\Grid.cpp.obj"
+},
+{
+  "directory": "C:/Users/Tripulante/Desktop/Repos/GameOfLife/build/x64-Release",
+  "command": "C:\\PROGRA~1\\MICROS~2\\2022\\COMMUN~1\\VC\\Tools\\MSVC\\1444~1.352\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -IC:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\Grid /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob1 /DNDEBUG -std:c++20 -ZI /FoGrid\\CMakeFiles\\Grid.dir\\Grid.cpp.obj /FdGrid\\CMakeFiles\\Grid.dir\\Grid.pdb /FS -c C:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\Grid\\Grid.cpp",
+  "file": "C:\\Users\\Tripulante\\Desktop\\Repos\\GameOfLife\\Grid\\Grid.cpp",
+  "output": "Grid\\CMakeFiles\\Grid.dir\\Grid.cpp.obj"
 }
 ]
