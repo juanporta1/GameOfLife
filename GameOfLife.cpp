@@ -187,8 +187,8 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 1000;
-    int rows = 1000;
+    int cols = 100;
+    int rows = 100;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -199,7 +199,8 @@ int main()
     vector<vector<uint64_t>> grid(cols, vector<uint64_t>(rows, initialValue));
     vector<vector<uint64_t>> temporaryGrid(cols, vector<uint64_t>(rows, initialValue));
 
-    grid = randomGrid(1000,1000,.3f);
+    //grid = randomGrid(rows,cols,.3f);
+    grid = gliderGun(rows, cols);
     vector<vector<uint64_t>> initialGrid = grid;
     sf::Font font;
     if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) return -1;
@@ -270,6 +271,7 @@ int main()
         thisTurn += dt;
         if (thisTurn > 0.1f && isPlaying) {
             thisTurn = 0.0f;
+			auto newRowsNow = chrono::high_resolution_clock::now();
 
             for (size_t x = 0; x < grid.size(); x++) {
                 if (grid[x][0]) {
@@ -307,6 +309,10 @@ int main()
                 }
             }
             temporaryGrid = grid;
+
+			auto newRowsEnd = chrono::high_resolution_clock::now();
+
+			std::cout << "Tiempo de insercion de filas: " << chrono::duration_cast<chrono::microseconds>(newRowsEnd - newRowsNow).count() << " microsegundos" << endl;
             for (size_t x = 0; x < grid.size(); x++) {
                 for (size_t y = 0; y < grid[0].size(); y++) {
 
