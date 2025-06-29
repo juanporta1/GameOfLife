@@ -2,24 +2,52 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <chrono>
 #include <random>
-#include <vector>
-#include <cstdint>
+#include <unordered_set>
+#include <utility>
 #include "GameOfLife.h"
 #include <string>
-#include <Grid.h>
+
 using namespace std;
 
 //Grilla Random
-std::vector<uint64_t> randomGrid(int rows, int cols, double density = 0.1) {
-    std::vector<uint64_t> grid(rows * cols,0);
+struct hasher {
+    std::size_t operator()(std::pair<int, int> p) const {
+        std::hash<int> hasher;
+        return hasher(p.first) ^ (hasher(p.second) << 1); // XOR de los hashes de las coordenadas
+    }
+};
+std::unordered_set<std::pair<int,int>, hasher> randomGrid(int rows, int cols, double density = 0.1) {
+    std::unordered_set<std::pair<int,int>, hasher> grid;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::bernoulli_distribution d(density);
 
     for (int r = 0; r < rows; ++r)
+    {
         for (int c = 0; c < cols; ++c)
-            grid[r * cols + c] = d(gen);
+        {
+            if (d(gen))
+            {
+                grid.insert({ r,c });
+            }
+        }
+    }
     return grid;
+}
+
+void updateVertices(sf::VertexArray& vertices, const std::unordered_set<std::pair<int, int>, hasher>& aliveCells, int cellSize) {
+    vertices.clear();
+    vertices.resize(aliveCells.size() * 4);
+    int index = 0;
+    for (const auto& cell : aliveCells) {
+        int x = cell.first;
+        int y = cell.second;
+        vertices[index + 0].position = sf::Vector2f(x * cellSize, y * cellSize);
+        vertices[index + 1].position = sf::Vector2f(x * cellSize + cellSize, y * cellSize);
+        vertices[index + 2].position = sf::Vector2f(x * cellSize + cellSize, y * cellSize + cellSize);
+        vertices[index + 3].position = sf::Vector2f(x * cellSize, y * cellSize + cellSize);
+        index += 4;
+    }
 }
 
 int main()
@@ -28,20 +56,13 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 1000;
-    int rows = 1000;
+    int cols = 2000;
+    int rows = 2000;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
     view.setSize(window.getSize().x, window.getSize().y);
     view.setCenter(view.getSize() / 2.f);
-    uint64_t initialValue = 0;
-    
-
-    vector<uint64_t> g = randomGrid(rows, cols, .3f);
-	Grid mainGrid(rows, cols, g);
-    Grid temporaryGrid(rows,cols, g);
-    vector<uint64_t> initialGrid = mainGrid.grid;
 
     sf::Font font;
     if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) return -1;
@@ -62,7 +83,19 @@ int main()
     sf::VertexArray cellsVertices(sf::Quads);
     auto lastFrame = chrono::high_resolution_clock::now();
 
+    std::unordered_set<std::pair<int, int>, hasher> aliveCells;
+    std::unordered_set<std::pair<int, int>, hasher> temporaryAliveCells;
+
+	aliveCells = randomGrid(rows, cols, 0.1);
    
+    aliveCells.insert({ 10, 10 });
+
+    int finalAlliveCells = aliveCells.size();
+    cellsVertices.clear();
+    cellsVertices.resize(finalAlliveCells * 4);
+    int index = 0;
+    
+	updateVertices(cellsVertices, aliveCells, cellSize);
 	while (window.isOpen())
 	{
         auto thisFrame = chrono::high_resolution_clock::now();
@@ -108,125 +141,34 @@ int main()
             view.zoom(1.f + dt );  // Aleja (zoom out)
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-            mainGrid.grid = initialGrid;
         }
         
-        thisTurn += dt;
-        if (thisTurn > 0.1f && isPlaying) {
+        
+        
 
-		   auto newRowsNow = chrono::high_resolution_clock::now();
 
-           for(int x = 0; x < mainGrid.rows; x++) {
-                if (mainGrid.grid[x * mainGrid.cols]) {
-                    for (int i = 0; i < mainGrid.rows; i++) {
-                        
-                        mainGrid.grid.insert(mainGrid.grid.begin() + mainGrid.cols * i + i, 0);
-                    }
-                    mainGrid.cols++;
-                    view.move(sf::Vector2f(0.f, cellSize));
-
-                    break;
-                }
-			}
-
-            for (int y = 0; y < mainGrid.cols; y++) {
-                if (mainGrid.grid[y]) {
-                    mainGrid.grid.insert(mainGrid.grid.begin(),mainGrid.cols, 0);
-                    mainGrid.rows++;
-                    view.move(sf::Vector2f(cellSize, 0.f));
-
-                    break;
-
-                }
-            }
-
-            for (int x = 0; x < mainGrid.rows; x++) {
-                if (mainGrid.grid[x * mainGrid.cols + mainGrid.cols - 1]) {
-                    for (int i = 0; i < mainGrid.rows; i++) {
-                        mainGrid.grid.insert(mainGrid.grid.begin() + (i + 1) * mainGrid.cols + i - 1, 0);
-                    }
-                    mainGrid.cols++;
-                    break;
-                }
-            }
-
-            for (int y = 0; y < mainGrid.cols; y++) {
-                if (mainGrid.grid[(mainGrid.rows - 1) * mainGrid.cols + y]) {
-                    mainGrid.grid.insert(mainGrid.grid.end(), mainGrid.cols, 0);
-                    mainGrid.rows++;
-                    break;
-                }
-            }
-           
-            temporaryGrid = mainGrid;
-            auto newRowsEnd = chrono::high_resolution_clock::now();
-			std::cout << "Tiempo de insercion de filas: " << chrono::duration_cast<chrono::microseconds>(newRowsEnd - newRowsNow).count() << " microsegundos" << endl;
-
-			auto aliveNow = chrono::high_resolution_clock::now();
-            for (size_t x = 0; x < mainGrid.rows; x++) {
-                for (size_t y = 0; y < mainGrid.cols; y++) {
-
-                    int aliveCellsAround = 0;
-                    for (int dx = -1; dx <= 1; dx++) {
-                        for (int dy = -1; dy <= 1; dy++) {
-                            if (dx == 0 && dy == 0) continue;
-                            if (x + dx < 0 || x + dx >= mainGrid.rows) continue;
-                            if (y + dy < 0 || y + dy >= mainGrid.cols) continue;
-                            aliveCellsAround += static_cast<int>(mainGrid.grid[(x + dx) * mainGrid.cols + (y+dy)]);
-                        }
-                    }
-
-                    if (mainGrid.grid[x * mainGrid.cols + y]) {
-                        if (aliveCellsAround >= 2 && aliveCellsAround <= 3) {
-                            temporaryGrid.grid[x * temporaryGrid.cols + y] = 1;
-                        }
-                        else {
-                            temporaryGrid.grid[x * temporaryGrid.cols + y] = 0;
-                        }
-                    }
-                    else {
-                        if (aliveCellsAround == 3) {
-                            temporaryGrid.grid[x * temporaryGrid.cols + y] = 1;
-                        }
-                        else {
-                            temporaryGrid.grid[x * temporaryGrid.cols + y] = 0;
-                        }
-                    }
-
-                }
-            }
-
-            mainGrid = temporaryGrid;
-        }
-		auto aliveCellsEnd = chrono::high_resolution_clock::now();
-
-		auto clearNow = chrono::high_resolution_clock::now();
 
         window.clear();
         window.setView(view);
 
-        // DIBUJO DE LAS CELDAS
-        if(thisTurn >= .1f){
+		// DIBUJO DE LAS CELDAS y ACTUALIZACION DE CELDAS
+        thisTurn += dt;
+        if(thisTurn >= .1f && isPlaying){
+            auto aliveCellsStart = chrono::high_resolution_clock::now();
+
             thisTurn = 0.0f;
 
-		    int finalAlliveCells = std::count(mainGrid.grid.begin(), mainGrid.grid.end(), 1);
-        
-		    cellsVertices.clear();
-		    cellsVertices.resize(finalAlliveCells * 4);
-            int index = 0;
-            for(int x = 0; x< mainGrid.rows; x++) {
-                for(int y = 0; y < mainGrid.cols; y++) {
-                    if (mainGrid.grid[x * mainGrid.cols + y] == 0) continue;
+           
 
-                    cellsVertices[index + 0].position = sf::Vector2f(x * cellSize, y * cellSize);              
-                    cellsVertices[index + 1].position = sf::Vector2f(x * cellSize + cellSize, y * cellSize);              
-                    cellsVertices[index + 2].position = sf::Vector2f(x * cellSize + cellSize, y * cellSize + cellSize);   
-                    cellsVertices[index + 3].position = sf::Vector2f(x * cellSize, y * cellSize + cellSize); 
+       		auto aliveCellsEnd = chrono::high_resolution_clock::now();
 
+		    cout << "Tiempo de actualizacion de celdas vivas: " << chrono::duration_cast<chrono::microseconds>(aliveCellsEnd - aliveCellsStart).count() << " microsegundos" << endl;
+            auto clearNow = chrono::high_resolution_clock::now();
 
-                    index += 4;
-                }
-		     }
+            updateVertices(cellsVertices, aliveCells, cellSize);
+
+            auto clearEnd = chrono::high_resolution_clock::now();
+            std::cout << "Tiempo de limpieza de pantalla: " << chrono::duration_cast<chrono::microseconds>(clearEnd - clearNow).count() << " microsegundos" << endl;
         }
         window.draw(cellsVertices);
 		window.setView(window.getDefaultView());
@@ -234,9 +176,7 @@ int main()
         window.draw(fpsText);
 
         window.display();
-		auto clearEnd = chrono::high_resolution_clock::now();
-		std::cout << "Tiempo de limpieza de pantalla: " << chrono::duration_cast<chrono::microseconds>(clearEnd - clearNow).count() << " microsegundos" << endl;
-        //cout << "En X: " << mainGrid.rows << " En Y: " << mainGrid.cols << endl;
+		
         
 	}
 	return 0;

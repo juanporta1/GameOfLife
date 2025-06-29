@@ -194,9 +194,6 @@
 		},
 		{
 			"path" : "libs/SFML-2.5.1/install/lib/cmake/SFML/SFMLConfigDependencies.cmake"
-		},
-		{
-			"path" : "Grid/CMakeLists.txt"
 		}
 	],
 	"kind" : "cmakeFiles",

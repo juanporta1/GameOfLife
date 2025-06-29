@@ -17,15 +17,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Indicar dónde está SFML dentro del proyecto
 set(SFML_DIR "${CMAKE_SOURCE_DIR}/libs/SFML-2.5.1/install/lib/cmake/SFML")
 
-add_subdirectory(Grid)
 # Buscar SFML, versión 2.5 o superior, y los componentes que usás
 find_package(SFML 2.5.1 COMPONENTS graphics window audio REQUIRED)
-
-
-add_executable(GameOfLife GameOfLife.cpp GameOfLife.h "Grid/Grid.h" "Grid/Grid.cpp")
+add_executable(GameOfLife GameOfLife.cpp GameOfLife.h )
 
 target_link_libraries(GameOfLife PRIVATE sfml-graphics sfml-window sfml-audio sfml-system)
-target_link_libraries(GameOfLife PRIVATE Grid)
 set_property(TARGET GameOfLife PROPERTY CXX_STANDARD 20)
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET GameOfLife PROPERTY CXX_STANDARD 20)
