@@ -187,8 +187,8 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 100;
-    int rows = 100;
+    int cols = 1000;
+    int rows = 1000;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -199,7 +199,7 @@ int main()
     vector<vector<uint64_t>> grid(cols, vector<uint64_t>(rows, initialValue));
     vector<vector<uint64_t>> temporaryGrid(cols, vector<uint64_t>(rows, initialValue));
 
-    grid = randomGrid(1000,1000,.1f);
+    grid = randomGrid(1000,1000,.3f);
     vector<vector<uint64_t>> initialGrid = grid;
     sf::Font font;
     if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) return -1;
