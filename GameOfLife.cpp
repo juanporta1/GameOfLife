@@ -59,8 +59,10 @@ int main()
     bool isPlaying = false;
     float thisTurn = 0.0f;
     float dt = 0;
-
+    sf::VertexArray cellsVertices(sf::Quads);
     auto lastFrame = chrono::high_resolution_clock::now();
+
+   
 	while (window.isOpen())
 	{
         auto thisFrame = chrono::high_resolution_clock::now();
@@ -111,8 +113,8 @@ int main()
         
         thisTurn += dt;
         if (thisTurn > 0.1f && isPlaying) {
-            thisTurn = 0.0f;
 
+		   auto newRowsNow = chrono::high_resolution_clock::now();
 
            for(int x = 0; x < mainGrid.rows; x++) {
                 if (mainGrid.grid[x * mainGrid.cols]) {
@@ -157,6 +159,10 @@ int main()
             }
            
             temporaryGrid = mainGrid;
+            auto newRowsEnd = chrono::high_resolution_clock::now();
+			std::cout << "Tiempo de insercion de filas: " << chrono::duration_cast<chrono::microseconds>(newRowsEnd - newRowsNow).count() << " microsegundos" << endl;
+
+			auto aliveNow = chrono::high_resolution_clock::now();
             for (size_t x = 0; x < mainGrid.rows; x++) {
                 for (size_t y = 0; y < mainGrid.cols; y++) {
 
@@ -192,28 +198,45 @@ int main()
 
             mainGrid = temporaryGrid;
         }
+		auto aliveCellsEnd = chrono::high_resolution_clock::now();
+
+		auto clearNow = chrono::high_resolution_clock::now();
 
         window.clear();
         window.setView(view);
 
         // DIBUJO DE LAS CELDAS
-        for (size_t x = 0; x < mainGrid.rows; x++) {
-            for (size_t y = 0; y < mainGrid.cols; y++) {
-                if (!mainGrid.grid[x * mainGrid.cols + y]) continue;
-                sf::RectangleShape cell(sf::Vector2f(cellSize, cellSize));
-                cell.setPosition(sf::Vector2f(x * cellSize, y * cellSize));
-                cell.setFillColor(sf::Color::White);
-                window.draw(cell);
-            }
+        if(thisTurn >= .1f){
+            thisTurn = 0.0f;
+
+		    int finalAlliveCells = std::count(mainGrid.grid.begin(), mainGrid.grid.end(), 1);
+        
+		    cellsVertices.clear();
+		    cellsVertices.resize(finalAlliveCells * 4);
+            int index = 0;
+            for(int x = 0; x< mainGrid.rows; x++) {
+                for(int y = 0; y < mainGrid.cols; y++) {
+                    if (mainGrid.grid[x * mainGrid.cols + y] == 0) continue;
+
+                    cellsVertices[index + 0].position = sf::Vector2f(x * cellSize, y * cellSize);              
+                    cellsVertices[index + 1].position = sf::Vector2f(x * cellSize + cellSize, y * cellSize);              
+                    cellsVertices[index + 2].position = sf::Vector2f(x * cellSize + cellSize, y * cellSize + cellSize);   
+                    cellsVertices[index + 3].position = sf::Vector2f(x * cellSize, y * cellSize + cellSize); 
+
+
+                    index += 4;
+                }
+		     }
         }
-       
+        window.draw(cellsVertices);
 		window.setView(window.getDefaultView());
 
         window.draw(fpsText);
 
         window.display();
-
-        cout << "En X: " << mainGrid.rows << " En Y: " << mainGrid.cols << endl;
+		auto clearEnd = chrono::high_resolution_clock::now();
+		std::cout << "Tiempo de limpieza de pantalla: " << chrono::duration_cast<chrono::microseconds>(clearEnd - clearNow).count() << " microsegundos" << endl;
+        //cout << "En X: " << mainGrid.rows << " En Y: " << mainGrid.cols << endl;
         
 	}
 	return 0;
