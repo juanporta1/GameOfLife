@@ -56,8 +56,8 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 2000;
-    int rows = 2000;
+    int cols = 100;
+    int rows = 100;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -84,6 +84,8 @@ int main()
     auto lastFrame = chrono::high_resolution_clock::now();
 
     std::unordered_set<std::pair<int, int>, hasher> aliveCells;
+    std::unordered_set<std::pair<int, int>, hasher> deadCells;
+
     std::unordered_set<std::pair<int, int>, hasher> temporaryAliveCells;
 
 	aliveCells = randomGrid(rows, cols, 0.1);
@@ -142,11 +144,6 @@ int main()
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
         }
-        
-        
-        
-
-
 
         window.clear();
         window.setView(view);
@@ -158,8 +155,43 @@ int main()
 
             thisTurn = 0.0f;
 
-           
+			temporaryAliveCells.clear();
+            deadCells.clear();
+            for (const pair<int, int>& cell : aliveCells) {
+                int cellsAround = 0;
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dy = -1; dy <= 1; dy++) {
+						if (dx == 0 && dy == 0) continue; // Skip the cell itself
+                        if(aliveCells.contains({cell.first + dx, cell.second + dy})){
+                            cellsAround++;
+                        }
+                        else {
+							deadCells.insert({ cell.first + dx, cell.second + dy });
+                        }
 
+                    }
+                }
+                if(cellsAround == 2 || cellsAround == 3) {
+                    temporaryAliveCells.insert(cell); // Cell stays alive
+				}
+            }
+
+            for (const pair<int, int>& cell : deadCells) {
+                int cellsAround = 0;
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dy = -1; dy <= 1; dy++) {
+                        if (dx == 0 && dy == 0) continue; 
+                        if (aliveCells.contains({cell.first + dx, cell.second + dy})) {
+                            cellsAround++;
+						}
+                    }
+                }
+                if (cellsAround == 3) {
+                    temporaryAliveCells.insert(cell); // Cell becomes alive
+				}
+            }
+
+            aliveCells = temporaryAliveCells;
        		auto aliveCellsEnd = chrono::high_resolution_clock::now();
 
 		    cout << "Tiempo de actualizacion de celdas vivas: " << chrono::duration_cast<chrono::microseconds>(aliveCellsEnd - aliveCellsStart).count() << " microsegundos" << endl;
