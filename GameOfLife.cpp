@@ -8,6 +8,7 @@
 #include "GameOfLife.h"
 #include <string>
 #include <robin_hood.h>
+#include <flat_hash_map.hpp>
 using namespace std;
 
 //Grilla Random
@@ -17,8 +18,8 @@ struct hasher {
         return hasher(p.first) ^ (hasher(p.second) << 1); // XOR de los hashes de las coordenadas
     }
 };
-robin_hood::unordered_set<std::pair<int,int>, hasher> randomGrid(int rows, int cols, double density = 0.1) {
-    robin_hood::unordered_set<std::pair<int,int>, hasher> grid;
+ska::flat_hash_set<std::pair<int,int>, hasher> randomGrid(int rows, int cols, double density = 0.1) {
+    ska::flat_hash_set<std::pair<int,int>, hasher> grid;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::bernoulli_distribution d(density);
@@ -36,7 +37,7 @@ robin_hood::unordered_set<std::pair<int,int>, hasher> randomGrid(int rows, int c
     return grid;
 }
 
-void updateVertices(sf::VertexArray& vertices, const robin_hood::unordered_set<std::pair<int, int>, hasher>& aliveCells, int cellSize) {
+void updateVertices(sf::VertexArray& vertices, const ska::flat_hash_set<std::pair<int, int>, hasher>& aliveCells, int cellSize) {
     vertices.clear();
     vertices.resize(aliveCells.size() * 4);
     int index = 0;
@@ -84,10 +85,10 @@ int main()
     sf::VertexArray cellsVertices(sf::Quads);
     auto lastFrame = chrono::high_resolution_clock::now();
 
-    robin_hood::unordered_set<std::pair<int, int>, hasher> aliveCells;
-    robin_hood::unordered_map<std::pair<int, int>,int, hasher> neighborCells;
+    ska::flat_hash_set<std::pair<int, int>, hasher> aliveCells;
+    ska::flat_hash_map<std::pair<int, int>,int, hasher> neighborCells;
 
-    robin_hood::unordered_set<std::pair<int, int>, hasher> temporaryAliveCells;
+    ska::flat_hash_set<std::pair<int, int>, hasher> temporaryAliveCells;
 
 	aliveCells = randomGrid(rows, cols, 0.1);
    
@@ -171,7 +172,7 @@ int main()
             }
 
             for (auto& [cell, neigbhors] : neighborCells) {
-                if (aliveCells.contains(cell)) 
+                if (aliveCells.find(cell) != aliveCells.end())
                 {
                     if (neigbhors == 2 || neigbhors == 3) {
                         temporaryAliveCells.insert(cell);
