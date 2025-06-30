@@ -9,6 +9,7 @@
 #include <string>
 #include <robin_hood.h>
 #include <flat_hash_map.hpp>
+#include <thread>
 using namespace std;
 
 //Grilla Random
@@ -90,16 +91,19 @@ int main()
 
     ska::flat_hash_set<std::pair<int, int>, hasher> temporaryAliveCells;
 
-	aliveCells = randomGrid(rows, cols, 0.1);
+	aliveCells = randomGrid(rows, cols, 0.1f);
    
     aliveCells.insert({ 10, 10 });
 
     int finalAlliveCells = aliveCells.size();
     cellsVertices.clear();
     cellsVertices.resize(finalAlliveCells * 4);
-    int index = 0;
-    
 	updateVertices(cellsVertices, aliveCells, cellSize);
+
+    int numThreads = 8;
+    std::vector<std::thread> threads;
+    std::vector<ska::flat_hash_map<pair<int, int>, int, hasher>> chunksNeighborhoods(numThreads);
+
 	while (window.isOpen())
 	{
         auto thisFrame = chrono::high_resolution_clock::now();
@@ -157,17 +161,39 @@ int main()
 
             thisTurn = 0.0f;
 
+            int total = aliveCells.size();
+            int chunkSize = (total + numThreads - 1) / numThreads;
+
+            auto itStart = aliveCells.begin();
 			temporaryAliveCells.clear();
             neighborCells.clear();
-            for (const pair<int, int>& cell : aliveCells) {
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dy = -1; dy <= 1; dy++) {
-						if (dx == 0 && dy == 0) continue; // Skip the cell itself
-                       
-						neighborCells[{ cell.first + dx, cell.second + dy }]++;
-                    
+            for (int t = 0; t < numThreads; ++t) {
+                auto begin = std::next(itStart, t * chunkSize);
+                auto end = (t == numThreads - 1)
+                    ? aliveCells.end() :
+                    std::next(begin, chunkSize);
 
+                threads.emplace_back([begin, end, &chunksNeighborhoods, t]() {
+                    for (auto it = begin; it != end; ++it) {
+                        const auto cell = *it;
+                        for (int dx = -1; dx <= 1; dx++) {
+                            for (int dy = -1; dy <= 1; dy++) {
+                                if (dx == 0 && dy == 0) continue; // Skip the cell itself
+                                chunksNeighborhoods[t][{ cell.first + dx, cell.second + dy }]++;
+                            }
+                        }
                     }
+                });
+            }
+
+            for (auto& thread : threads) {
+                thread.join();
+            }
+            threads.clear();
+
+            for (const auto& chunk : chunksNeighborhoods) {
+                for (const auto& [coords, count] : chunk) {
+                    neighborCells[coords] += count;
                 }
             }
 
@@ -189,7 +215,7 @@ int main()
             aliveCells = temporaryAliveCells;
        		auto aliveCellsEnd = chrono::high_resolution_clock::now();
 
-		    cout << "Tiempo de actualizacion de celdas vivas: " << chrono::duration_cast<chrono::microseconds>(aliveCellsEnd - aliveCellsStart).count() << " microsegundos" << endl;
+		    std::cout << "Tiempo de actualizacion de celdas vivas: " << chrono::duration_cast<chrono::microseconds>(aliveCellsEnd - aliveCellsStart).count() << " microsegundos" << endl;
             auto clearNow = chrono::high_resolution_clock::now();
 
             updateVertices(cellsVertices, aliveCells, cellSize);
@@ -203,7 +229,7 @@ int main()
         window.draw(fpsText);
 
         window.display();
-		
+
         
 	}
 	return 0;
