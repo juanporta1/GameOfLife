@@ -28,8 +28,8 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 1000;
-    int rows = 1000;
+    int cols = 2000;
+    int rows = 2000;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -116,7 +116,7 @@ int main()
 
 		   auto newRowsNow = chrono::high_resolution_clock::now();
 
-           for(int x = 0; x < mainGrid.rows; x++) {
+           /*for(int x = 0; x < mainGrid.rows; x++) {
                 if (mainGrid.grid[x * mainGrid.cols]) {
                     for (int i = 0; i < mainGrid.rows; i++) {
                         
@@ -127,20 +127,20 @@ int main()
 
                     break;
                 }
-			}
+			}*/
 
-            for (int y = 0; y < mainGrid.cols; y++) {
-                if (mainGrid.grid[y]) {
-                    mainGrid.grid.insert(mainGrid.grid.begin(),mainGrid.cols, 0);
-                    mainGrid.rows++;
-                    view.move(sf::Vector2f(cellSize, 0.f));
+            //for (int y = 0; y < mainGrid.cols; y++) {
+            //    if (mainGrid.grid[y]) {
+            //        mainGrid.grid.insert(mainGrid.grid.begin(),mainGrid.cols, 0);
+            //        mainGrid.rows++;
+            //        view.move(sf::Vector2f(cellSize, 0.f));
 
-                    break;
+            //        break;
 
-                }
-            }
+            //    }
+            //}
 
-            for (int x = 0; x < mainGrid.rows; x++) {
+           /* for (int x = 0; x < mainGrid.rows; x++) {
                 if (mainGrid.grid[x * mainGrid.cols + mainGrid.cols - 1]) {
                     for (int i = 0; i < mainGrid.rows; i++) {
                         mainGrid.grid.insert(mainGrid.grid.begin() + (i + 1) * mainGrid.cols + i - 1, 0);
@@ -148,15 +148,15 @@ int main()
                     mainGrid.cols++;
                     break;
                 }
-            }
+            }*/
 
-            for (int y = 0; y < mainGrid.cols; y++) {
+            /*for (int y = 0; y < mainGrid.cols; y++) {
                 if (mainGrid.grid[(mainGrid.rows - 1) * mainGrid.cols + y]) {
                     mainGrid.grid.insert(mainGrid.grid.end(), mainGrid.cols, 0);
                     mainGrid.rows++;
                     break;
                 }
-            }
+            }*/
            
             temporaryGrid = mainGrid;
             auto newRowsEnd = chrono::high_resolution_clock::now();
