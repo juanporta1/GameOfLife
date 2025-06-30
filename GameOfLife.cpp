@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <utility>
 #include "GameOfLife.h"
+#include <WorkerPool.h>
 #include <string>
 #include <robin_hood.h>
 #include <flat_hash_map.hpp>
@@ -13,12 +14,7 @@
 using namespace std;
 
 //Grilla Random
-struct hasher {
-    std::size_t operator()(std::pair<int, int> p) const {
-        std::hash<int> hasher;
-        return hasher(p.first) ^ (hasher(p.second) << 1); // XOR de los hashes de las coordenadas
-    }
-};
+
 ska::flat_hash_set<std::pair<int,int>, hasher> randomGrid(int rows, int cols, double density = 0.1) {
     ska::flat_hash_set<std::pair<int,int>, hasher> grid;
     std::random_device rd;
@@ -90,7 +86,6 @@ int main()
     ska::flat_hash_map<std::pair<int, int>,int, hasher> neighborCells;
 
     ska::flat_hash_set<std::pair<int, int>, hasher> temporaryAliveCells;
-
 	aliveCells = randomGrid(rows, cols, 0.1f);
    
     aliveCells.insert({ 10, 10 });
@@ -101,8 +96,7 @@ int main()
 	updateVertices(cellsVertices, aliveCells, cellSize);
 
     int numThreads = 8;
-    std::vector<std::thread> threads;
-    std::vector<ska::flat_hash_map<pair<int, int>, int, hasher>> chunksNeighborhoods(numThreads);
+    WorkerPool threads(numThreads);
 
 	while (window.isOpen())
 	{
@@ -167,35 +161,9 @@ int main()
             auto itStart = aliveCells.begin();
 			temporaryAliveCells.clear();
             neighborCells.clear();
-            for (int t = 0; t < numThreads; ++t) {
-                auto begin = std::next(itStart, t * chunkSize);
-                auto end = (t == numThreads - 1)
-                    ? aliveCells.end() :
-                    std::next(begin, chunkSize);
+            
 
-                threads.emplace_back([begin, end, &chunksNeighborhoods, t]() {
-                    for (auto it = begin; it != end; ++it) {
-                        const auto cell = *it;
-                        for (int dx = -1; dx <= 1; dx++) {
-                            for (int dy = -1; dy <= 1; dy++) {
-                                if (dx == 0 && dy == 0) continue; // Skip the cell itself
-                                chunksNeighborhoods[t][{ cell.first + dx, cell.second + dy }]++;
-                            }
-                        }
-                    }
-                });
-            }
-
-            for (auto& thread : threads) {
-                thread.join();
-            }
-            threads.clear();
-
-            for (const auto& chunk : chunksNeighborhoods) {
-                for (const auto& [coords, count] : chunk) {
-                    neighborCells[coords] += count;
-                }
-            }
+            neighborCells = threads.runProcess(aliveCells);
 
             for (auto& [cell, neigbhors] : neighborCells) {
                 if (aliveCells.find(cell) != aliveCells.end())
