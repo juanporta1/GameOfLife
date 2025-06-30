@@ -22,6 +22,7 @@ find_package(SFML 2.5.1 COMPONENTS graphics window audio REQUIRED)
 add_executable(GameOfLife GameOfLife.cpp GameOfLife.h )
 
 target_link_libraries(GameOfLife PRIVATE sfml-graphics sfml-window sfml-audio sfml-system)
+target_include_directories(GameOfLife PUBLIC ${CMAKE_SOURCE_DIR}/libs)
 set_property(TARGET GameOfLife PROPERTY CXX_STANDARD 20)
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET GameOfLife PROPERTY CXX_STANDARD 20)

@@ -7,7 +7,7 @@
 #include <utility>
 #include "GameOfLife.h"
 #include <string>
-
+#include <robin_hood.h>
 using namespace std;
 
 //Grilla Random
@@ -17,8 +17,8 @@ struct hasher {
         return hasher(p.first) ^ (hasher(p.second) << 1); // XOR de los hashes de las coordenadas
     }
 };
-std::unordered_set<std::pair<int,int>, hasher> randomGrid(int rows, int cols, double density = 0.1) {
-    std::unordered_set<std::pair<int,int>, hasher> grid;
+robin_hood::unordered_set<std::pair<int,int>, hasher> randomGrid(int rows, int cols, double density = 0.1) {
+    robin_hood::unordered_set<std::pair<int,int>, hasher> grid;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::bernoulli_distribution d(density);
@@ -36,7 +36,7 @@ std::unordered_set<std::pair<int,int>, hasher> randomGrid(int rows, int cols, do
     return grid;
 }
 
-void updateVertices(sf::VertexArray& vertices, const std::unordered_set<std::pair<int, int>, hasher>& aliveCells, int cellSize) {
+void updateVertices(sf::VertexArray& vertices, const robin_hood::unordered_set<std::pair<int, int>, hasher>& aliveCells, int cellSize) {
     vertices.clear();
     vertices.resize(aliveCells.size() * 4);
     int index = 0;
@@ -57,8 +57,8 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 1000;
-    int rows = 1000;
+    int cols = 1500;
+    int rows = 1500;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -84,10 +84,10 @@ int main()
     sf::VertexArray cellsVertices(sf::Quads);
     auto lastFrame = chrono::high_resolution_clock::now();
 
-    std::unordered_set<std::pair<int, int>, hasher> aliveCells;
-    std::unordered_map<std::pair<int, int>,int, hasher> neighborCells;
+    robin_hood::unordered_set<std::pair<int, int>, hasher> aliveCells;
+    robin_hood::unordered_map<std::pair<int, int>,int, hasher> neighborCells;
 
-    std::unordered_set<std::pair<int, int>, hasher> temporaryAliveCells;
+    robin_hood::unordered_set<std::pair<int, int>, hasher> temporaryAliveCells;
 
 	aliveCells = randomGrid(rows, cols, 0.1);
    
