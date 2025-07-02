@@ -5,9 +5,24 @@
 1860	2177	7730255963317883	GameOfLife.exe	417a415fa518c0a2
 1747	1860	7730255962191171	modules/module.lib	dc5d4664c18cfcc7
 1178	1318	7728745065191203	Grid/Grid.lib	cfcc6651eb7d2e10
+<<<<<<< HEAD
 42	1746	7730255945135780	modules/CMakeFiles/module.dir/WorkerPool.cpp.obj	16c1c58a2a9ec045
 55	897	7730267147215658	build.ninja	c01056dbc2687cfb
 65	2010	7730267149976487	modules/CMakeFiles/module.dir/WorkerPool.cpp.obj	16c1c58a2a9ec045
 2050	2126	7730267169821134	modules/module.lib	dc5d4664c18cfcc7
 73	3754	7730267150056497	CMakeFiles/GameOfLife.dir/GameOfLife.cpp.obj	e8ac64d93b6c9e5c
 3754	4094	7730267187158880	GameOfLife.exe	417a415fa518c0a2
+=======
+23	1886	7729482105225006	CMakeFiles/GameOfLife.dir/GameOfLife.cpp.obj	932e03edacbd2da6
+1887	2025	7729482123914921	GameOfLife.exe	da4961793784969b
+33	1660	7729482701273840	CMakeFiles/GameOfLife.dir/GameOfLife.cpp.obj	932e03edacbd2da6
+1698	1860	7729482717927687	GameOfLife.exe	da4961793784969b
+23	1696	7729483057984022	CMakeFiles/GameOfLife.dir/GameOfLife.cpp.obj	932e03edacbd2da6
+1697	1847	7729483074695690	GameOfLife.exe	da4961793784969b
+26	1998	7729489172271382	CMakeFiles/GameOfLife.dir/GameOfLife.cpp.obj	932e03edacbd2da6
+1999	2189	7729489192002526	GameOfLife.exe	da4961793784969b
+24	1685	7729489312506541	CMakeFiles/GameOfLife.dir/GameOfLife.cpp.obj	932e03edacbd2da6
+1685	1844	7729489329119336	GameOfLife.exe	da4961793784969b
+25	1673	7729489539729549	CMakeFiles/GameOfLife.dir/GameOfLife.cpp.obj	932e03edacbd2da6
+1674	1864	7729489556253486	GameOfLife.exe	da4961793784969b
+>>>>>>> parent of e5f7641 (prueba con ska)
