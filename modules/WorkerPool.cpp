@@ -1,5 +1,7 @@
-#include <WorkerPool.h>
+﻿#include <WorkerPool.h>
+#include <iostream>
 
+using namespace std;
 WorkerPool::WorkerPool(int t) : t(t), chunksNeighbors(t) {
     for (size_t i = 0; i < t; ++i) {
         threads.emplace_back([this, i]() { this->processChunk(i); });
@@ -19,31 +21,34 @@ WorkerPool::~WorkerPool() {
 }
 
 ska::flat_hash_map<pair<int, int>, int, hasher> WorkerPool::runProcess(ska::flat_hash_set<pair<int, int>, hasher>& aliveCells) {
-    size_t chunk_size = (aliveCells.size() + t - 1) / t;
-
-    
-    {
-        std::unique_lock<mutex> lock(mainMutex);
-        startTask = false;
-    }
+    vector<pair<int, int>> flatData(aliveCells.begin(), aliveCells.end()); 
+    size_t chunk_size = (flatData.size() + t - 1) / t;
 
     {
+       
         std::unique_lock<mutex> lock(mainMutex);
-        this->data = &aliveCells;
+		this->flatData = std::move(flatData);
         this->chunkSize = chunk_size;
         this->finishedCount = 0;
-        this->startTask = true; 
         for (auto& chunk : chunksNeighbors) {
             chunk.clear();
         }
+        this->startTask = true;  // Señal para que los hilos empiecen a trabajar
     }
 
-    cv.notify_all();
+    cv.notify_all();  // Despertar a todos los hilos
 
-    std::unique_lock<mutex> lock(syncProcessMutex);
-    syncProcessCV.wait(lock, [this]() {
-        return finishedCount == t;
-        });
+    {
+        std::unique_lock<mutex> lock(syncProcessMutex);
+        syncProcessCV.wait(lock, [this]() {
+            return finishedCount == t;
+            });
+    }
+
+    {
+        std::unique_lock<mutex> lock(mainMutex);
+        this->startTask = false;  // Resetear la bandera una vez terminada la tarea
+    }
 
     ska::flat_hash_map<pair<int, int>, int, hasher> neighbors;
     for (const auto& chunk : chunksNeighbors) {
@@ -60,24 +65,22 @@ void WorkerPool::processChunk(size_t threadIndex) {
         {
             std::unique_lock<mutex> lock(mainMutex);
             cv.wait(lock, [this]() {
-                return stopProcessing || startTask;
+                return this->stopProcessing || this->startTask;
                 });
-
-            if (stopProcessing) return;
+            if (this->stopProcessing) return;
         }
 
-        auto startIt = data->begin();
-        std::advance(startIt, threadIndex * chunkSize);
-
-        auto endIt = data->end();
-        if ((threadIndex + 1) * chunkSize < data->size()) {
-            endIt = data->begin();
-            std::advance(endIt, (threadIndex + 1) * chunkSize);
-        }
+        auto startIt = flatData.begin() + threadIndex * chunkSize;
+        auto endIt = (threadIndex + 1) * chunkSize < flatData.size()
+            ? flatData.begin() + (threadIndex + 1) * chunkSize
+            : flatData.end();
 
         for (auto it = startIt; it != endIt; ++it) {
-            auto cell = *it;
-
+            auto& cell = *it;
+            /*{
+                std::unique_lock<mutex> lock(coutMutex);
+                cout << "Celula: " << cell.first << ", " << cell.second << " en hilo " << threadIndex << endl;
+            }*/
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
                     if (dx == 0 && dy == 0) continue;

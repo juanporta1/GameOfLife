@@ -55,8 +55,8 @@ int main()
     int cellSize = 5;
     //int cols = window.getSize().x / cellSize;
     //int rows = window.getSize().y / cellSize;
-    int cols = 1500;
-    int rows = 1500;
+    int cols = 2000;
+    int rows = 2000;
 
     sf::View view;
     view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -95,7 +95,7 @@ int main()
     cellsVertices.resize(finalAlliveCells * 4);
 	updateVertices(cellsVertices, aliveCells, cellSize);
 
-    int numThreads = 8;
+    int numThreads = 2;
     WorkerPool threads(numThreads);
 
 	while (window.isOpen())

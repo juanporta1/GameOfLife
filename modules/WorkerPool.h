@@ -21,14 +21,15 @@ public:
 	ska::flat_hash_map<pair<int,int>, int, hasher> runProcess(ska::flat_hash_set<pair<int,int>,hasher>& aliveCells);
 private:
 	size_t t;
-	size_t finishedCount = 0;
+	atomic<size_t> finishedCount = 0;
 	vector<thread> threads;
 	vector<ska::flat_hash_map<pair<int, int>, int, hasher>> chunksNeighbors;
 	
-	ska::flat_hash_set<pair<int, int>, hasher>* data;
+	vector<pair<int, int>> flatData;
 	size_t chunkSize = 0;
 	mutex mainMutex;
 	mutex syncProcessMutex;
+	mutex coutMutex;
 	condition_variable cv;
 	condition_variable syncProcessCV;
 	
